@@ -7,7 +7,7 @@ public class ProjectileLauncher : MonoBehaviour
 {
     [SerializeField] private float _speedFlyBullet;
     [SerializeField] private float _timeShooting;
-    [SerializeField] private GameObject _prefab;
+    [SerializeField] private GameObject _prefabBullets;
 
     private Coroutine _coroutine;
     private Transform _objectTarget;
@@ -25,15 +25,21 @@ public class ProjectileLauncher : MonoBehaviour
 
     private IEnumerator WaitShootingWorker()
     {
+        WaitForSeconds waitForSeconds = new WaitForSeconds(_timeShooting);
+
         while (enabled)
         {
-            yield return new WaitForSeconds(_timeShooting);
+            yield return waitForSeconds;
 
-            var vector3Direction = (_objectTarget.position - transform.position).normalized;
-            var newBullet = Instantiate(_prefab, transform.position + vector3Direction, Quaternion.identity);
+            Vector3 vector3Direction = (_objectTarget.position - transform.position).normalized;
+            
+            GameObject newBullet = Instantiate(_prefabBullets, transform.position + vector3Direction, Quaternion.identity);
 
-            newBullet.GetComponent<Rigidbody>().transform.up = vector3Direction;
-            newBullet.GetComponent<Rigidbody>().velocity = vector3Direction * _speedFlyBullet;
+            if (newBullet.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
+            {
+                rigidbody.transform.up = vector3Direction;
+                rigidbody.velocity = vector3Direction * _speedFlyBullet;
+            }
         }
     }
 }
